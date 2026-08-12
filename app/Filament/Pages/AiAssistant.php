@@ -9,6 +9,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AiAssistant extends Page implements HasForms
 {
@@ -50,6 +51,11 @@ class AiAssistant extends Page implements HasForms
         $this->form->fill();
     }
 
+    protected function rateLimitKey(): string
+    {
+        return 'ai-assistant:'.auth()->id();
+    }
+
     public function ask(): void
     {
         $state = $this->form->getState();
@@ -58,6 +64,20 @@ class AiAssistant extends Page implements HasForms
         if ($question === '') {
             return;
         }
+
+        $key = $this->rateLimitKey();
+
+        if (RateLimiter::tooManyAttempts($key, maxAttempts: 10)) {
+            Notification::make()
+                ->title('Trop de questions')
+                ->body('Merci de patienter '.RateLimiter::availableIn($key).' secondes avant de reposer une question.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        RateLimiter::hit($key, decaySeconds: 60);
 
         $history = $this->messages;
 
