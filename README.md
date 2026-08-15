@@ -2,12 +2,31 @@
 
 Application de gestion interne (clients, contacts, opportunités, commandes) construite sur la stack **TALL** (Laravel, Filament), avec un assistant conversationnel capable de répondre en langage naturel à des questions sur les données du CRM, via une architecture RAG (Retrieval-Augmented Generation).
 
+**Projet de démonstration** — pensé pour illustrer une intégration IA de bout en bout dans une application métier réelle : modélisation des données, pipeline RAG (embeddings + recherche par similarité + génération), et les arbitrages techniques que ça implique en conditions réelles (rate limits, coûts API, robustesse réseau). Pas de démo en ligne pour l'instant — voir la section [Installation](#installation) pour lancer le projet en local.
+
+## Aperçu
+
+| Liste des clients | Pipeline commercial |
+|---|---|
+| ![Liste des clients](docs/screenshots/clients.png) | ![Pipeline des opportunités](docs/screenshots/opportunities.png) |
+
+**Assistant IA en action** — question posée en langage naturel, réponse générée à partir des données réelles du CRM (client, opportunité, contact associé) :
+
+![Assistant IA répondant à une question sur un client](docs/screenshots/ai-assistant.png)
+
 ## Fonctionnalités
 
 - **Gestion CRM** : clients, contacts, avec fiches détaillées et recherche
 - **Pipeline commercial** : opportunités avec étape, montant estimé, probabilité, date de clôture
 - **Volet ERP léger** : catalogue produits, commandes avec lignes et calcul automatique du total, référence auto-générée
 - **Assistant IA conversationnel** : pose des questions en langage naturel sur les clients/opportunités/commandes ; garde le contexte sur plusieurs échanges (ex. « Quel est son site web ? » après avoir parlé d'un client, sans répéter son nom)
+
+## Ce que ce projet démontre
+
+- **Intégration IA en conditions réelles**, pas un simple wrapper d'API : pipeline RAG complet (embeddings → recherche par similarité → génération augmentée), gestion du contexte conversationnel, prompt système contraint pour éviter les hallucinations sur des données métier.
+- **Modélisation d'un domaine métier complet** : CRM (clients, contacts, pipeline commercial) + volet ERP léger (catalogue, commandes, lignes, totaux calculés), avec les relations et règles associées.
+- **Rigueur sur les points qui cassent en production** : rate limiting utilisateur sur l'assistant IA, gestion d'erreurs sans fuite d'information technique, `.env` jamais exposé, jobs asynchrones pour ne pas bloquer les requêtes HTTP sur des appels API externes.
+- **Honnêteté technique** : les limites connues et les arbitrages (voir ci-dessous) sont documentés plutôt que cachés — utile pour juger la capacité à livrer un projet maintenable, pas juste une démo qui marche une fois.
 
 ## Stack technique
 
@@ -74,9 +93,16 @@ Puis :
 ```bash
 php artisan migrate
 php artisan make:filament-user   # créer un compte administrateur
-php artisan serve
-php artisan queue:work           # dans un terminal séparé — indispensable pour la génération des embeddings
+php artisan db:seed --class=DemoSeeder   # optionnel — données de démo (clients, opportunités, commandes)
 ```
+
+Pour lancer le serveur **et** le worker de file d'attente (indispensable pour la génération des embeddings) en une seule commande :
+
+```bash
+composer run dev
+```
+
+Ça démarre en parallèle `php artisan serve`, `php artisan queue:listen` et les logs (`php artisan pail`). Sans cette commande, `php artisan serve` bloque le terminal — il faut alors ouvrir un second terminal pour `php artisan queue:work`.
 
 Pour générer les embeddings des enregistrements déjà existants :
 
