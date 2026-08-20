@@ -13,4 +13,11 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-exec php artisan serve --host=0.0.0.0 --port="${PORT:-10000}"
+# php artisan serve is single-threaded and not meant for real traffic —
+# Render's health checks tripped it up in practice. Nginx + PHP-FPM is the
+# standard, robust way to serve Laravel; nginx's listen port is templated
+# because Render assigns $PORT dynamically at runtime.
+sed "s/__PORT__/${PORT:-10000}/" /etc/nginx/nginx-site.conf.template > /etc/nginx/sites-available/default
+
+php-fpm -D
+exec nginx -g 'daemon off;'
