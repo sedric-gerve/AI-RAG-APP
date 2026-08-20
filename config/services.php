@@ -45,4 +45,6 @@ return [
         'model' => env('VOYAGE_MODEL', 'voyage-3.5'),
     ],
 
+    'backfill_token' => env('BACKFILL_TOKEN'),
+
 ];
