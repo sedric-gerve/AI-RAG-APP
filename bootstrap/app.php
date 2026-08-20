@@ -12,7 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Render (and most PaaS) terminate TLS at a reverse proxy, so
+        // Laravel must trust its forwarded headers to correctly detect
+        // HTTPS — otherwise secure cookies and generated URLs break.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

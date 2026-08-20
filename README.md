@@ -112,6 +112,22 @@ php artisan embeddings:generate --sync
 
 L'application est accessible sur `http://localhost:8000/admin`, l'assistant IA sur `/admin/ai-assistant`.
 
+## Déploiement (Render, offre gratuite)
+
+Le dépôt inclut un `Dockerfile` et un `render.yaml` pour déployer directement sur [Render](https://render.com/) via son mécanisme de Blueprint.
+
+### Étapes
+
+1. Sur Render : **New → Blueprint**, connecter ce dépôt GitHub. Render détecte `render.yaml` et propose de créer le service web + la base PostgreSQL automatiquement.
+2. Renseigner les variables marquées `sync: false` dans le tableau de bord Render avant le premier déploiement : `APP_KEY` (générer une valeur dédiée avec `php artisan key:generate --show`, ne pas réutiliser celle de développement), `APP_URL` (l'URL `*.onrender.com` n'est connue qu'après la première création — à mettre à jour ensuite), `ANTHROPIC_API_KEY`, `VOYAGE_API_KEY`.
+3. Premier déploiement : migrations et données de démo sont exécutées automatiquement par `docker/entrypoint.sh`.
+
+### Compromis assumés de ce déploiement gratuit
+
+- **Pas de worker de file d'attente séparé.** L'offre gratuite ne permet pas de faire tourner un second processus en continu. `QUEUE_CONNECTION` est donc mis à `sync` uniquement pour ce déploiement : les embeddings sont générés de façon synchrone à la sauvegarde plutôt qu'en arrière-plan. En local, l'architecture reste asynchrone (voir plus haut) — c'est un compromis spécifique à l'hébergement gratuit, pas un changement d'architecture.
+- **Mise en veille automatique.** Un service web gratuit Render s'endort après une période d'inactivité ; la première requête suivante peut prendre 30 à 60 secondes le temps du redémarrage.
+- **Base PostgreSQL gratuite temporaire.** Chez Render, une base gratuite expire 30 jours après sa création, avec 14 jours de grâce pour la mettre à niveau avant suppression définitive des données. Le compte de démonstration est reseedé automatiquement à chaque démarrage du service (`DemoSeeder`, idempotent), donc recréer la base après expiration suffit à retrouver un état fonctionnel sans étape manuelle supplémentaire.
+
 ## À propos du développement de ce projet
 
 Ce projet a été développé avec l'assistance de [Claude Code](https://claude.com/claude-code). Les décisions d'architecture (choix de la stack, arbitrage pgvector vs. calcul PHP, structure des entités CRM/ERP, conception du pipeline RAG) ont été prises et validées au fil de la conversation ; l'implémentation a été largement assistée par IA. Cette transparence est volontaire : le code reflète un usage réel et assumé des outils de développement assisté par IA, courant en 2026.
