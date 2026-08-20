@@ -1,6 +1,13 @@
 #!/bin/sh
 set -e
 
+# Render's dashboard env var fields have, in practice, let a stray CR/LF
+# through on paste — enough to make Laravel's URL generator throw on every
+# boot ("A URI cannot contain CR/LF/TAB characters"). Sanitize defensively
+# here instead of relying on manual re-entry being perfect every time.
+export APP_URL=$(printf '%s' "$APP_URL" | tr -d '\r\n\t')
+export DB_URL=$(printf '%s' "$DB_URL" | tr -d '\r\n\t')
+
 echo ">>> ENTRYPOINT START"
 echo ">>> APP_URL is: [${APP_URL}]"
 echo ">>> DB_URL is set: $([ -n "$DB_URL" ] && echo yes || echo no)"
