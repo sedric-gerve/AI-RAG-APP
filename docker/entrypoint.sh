@@ -3,10 +3,16 @@ set -e
 
 # Render's dashboard env var fields have, in practice, let a stray CR/LF
 # through on paste — enough to make Laravel's URL generator throw on every
-# boot ("A URI cannot contain CR/LF/TAB characters"). Sanitize defensively
-# here instead of relying on manual re-entry being perfect every time.
+# boot ("A URI cannot contain CR/LF/TAB characters"), and enough to make
+# the backfill route's hash_equals() token check silently fail (404).
+# Sanitize every manually-entered secret defensively rather than relying
+# on re-entry being perfect every time.
+export APP_KEY=$(printf '%s' "$APP_KEY" | tr -d '\r\n\t')
 export APP_URL=$(printf '%s' "$APP_URL" | tr -d '\r\n\t')
 export DB_URL=$(printf '%s' "$DB_URL" | tr -d '\r\n\t')
+export ANTHROPIC_API_KEY=$(printf '%s' "$ANTHROPIC_API_KEY" | tr -d '\r\n\t')
+export VOYAGE_API_KEY=$(printf '%s' "$VOYAGE_API_KEY" | tr -d '\r\n\t')
+export BACKFILL_TOKEN=$(printf '%s' "$BACKFILL_TOKEN" | tr -d '\r\n\t')
 
 echo ">>> ENTRYPOINT START"
 echo ">>> APP_URL is: [${APP_URL}]"
