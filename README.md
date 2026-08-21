@@ -2,7 +2,9 @@
 
 Application de gestion interne (clients, contacts, opportunités, commandes) construite sur la stack **TALL** (Laravel, Filament), avec un assistant conversationnel capable de répondre en langage naturel à des questions sur les données du CRM, via une architecture RAG (Retrieval-Augmented Generation).
 
-**Projet de démonstration** — pensé pour illustrer une intégration IA de bout en bout dans une application métier réelle : modélisation des données, pipeline RAG (embeddings + recherche par similarité + génération), et les arbitrages techniques que ça implique en conditions réelles (rate limits, coûts API, robustesse réseau). Pas de démo en ligne pour l'instant — voir la section [Installation](#installation) pour lancer le projet en local.
+**Projet de démonstration** — pensé pour illustrer une intégration IA de bout en bout dans une application métier réelle : modélisation des données, pipeline RAG (embeddings + recherche par similarité + génération), et les arbitrages techniques que ça implique en conditions réelles (rate limits, coûts API, robustesse réseau).
+
+**🔗 Démo en ligne : [ai-rag-crm.onrender.com/admin](https://ai-rag-crm.onrender.com/admin)** — compte de démonstration `demo@example.com` / `demo12345`. Hébergée sur l'offre gratuite de Render : la première requête après une période d'inactivité peut prendre 30 à 60 secondes (voir la section [Déploiement](#déploiement-render-offre-gratuite) pour le détail des compromis).
 
 ## Aperçu
 
